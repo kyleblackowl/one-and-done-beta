@@ -540,7 +540,7 @@ if (mode === "official") {
     if (mode === "official") startBtn.disabled = officialLocked();
   }
 
-  // ====== Init ======
+    // ====== Init ======
   dayKeyPill.textContent = `Day: ${dayKeyET()}`;
   updateModeUI();
 
@@ -554,4 +554,6 @@ if (mode === "official") {
   applyOfficialLockUI();
   updateCountdown();
   setInterval(updateCountdown, 250);
+
 })();
+</script>
