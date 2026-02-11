@@ -424,43 +424,33 @@
 
     setState("done");
 
-    if (mode === "official") {
-      setTodayOfficial({
-        dayKey: dayKeyET(),
-        rounds: ROUNDS,
-        wrongClicks,
-        penaltyMs: penaltyTotal,
-        totalMs,
-        finalMs,
-        score,
-        completedAt: Date.now()
-      });
-const username = getUsername();
+if (mode === "official") {
+  setTodayOfficial({
+    dayKey: dayKeyET(),
+    rounds: ROUNDS,
+    wrongClicks,
+    penaltyMs: penaltyTotal,
+    totalMs,
+    finalMs,
+    score,
+    completedAt: Date.now()
+  });
 
-postScore({
-  game: GAME_NAME,
-  mode: "official",
-  username,
-  score,
-  finalMs,
-  wrongClicks,
-  penaltyMs: penaltyTotal
-});
+  const username = getUsername();
+  postScore({
+    game: GAME_NAME,
+    mode: "official",
+    username,
+    score,
+    finalMs,
+    wrongClicks,
+    penaltyMs: penaltyTotal
+  });
 
-      const username = getUsername();
-      postScore({
-        game: GAME_NAME,
-        mode: "official",
-        username,
-        score,
-        finalMs,
-        wrongClicks,
-        penaltyMs: penaltyTotal
-      });
-      applyOfficialLockUI();
-      startBtn.disabled = true;
-    }
-  }
+  applyOfficialLockUI();
+  startBtn.disabled = true;
+}
+
 
   function markReveal(pickedTile, correct) {
     const tiles = [...document.querySelectorAll(".tile")];
