@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Odd One Out (5 Sets + Penalty) — Practice + Official</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:#0b0f19; color:#e8eefc; margin:0; display:flex; min-height:100vh; align-items:center; justify-content:center; }
+    .card { width:min(920px, 94vw); background:#121a2b; border:1px solid #223056; border-radius:18px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
+    h1 { font-size:18px; margin:0 0 8px; }
+    p { margin:8px 0 14px; color:#b8c6ee; font-size:14px; line-height:1.35; }
+
+    .top { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; }
+    .pill { display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid #2a3a64; background:#0e1526; font-size:12px; color:#b8c6ee; }
+    .badge { display:inline-flex; align-items:center; gap:6px; font-weight:900; letter-spacing:.3px; padding:4px 10px; border-radius:999px; border:1px solid #2a3a64; background:rgba(44,108,255,.12); }
+    .badge.practice { background:rgba(255,255,255,.06); }
+    .badge.official { background:rgba(44,108,255,.18); }
+
+    .arena {
+      margin-top:10px;
+      border-radius:16px;
+      border:1px solid #223056;
+      background:#0e1526;
+      padding:16px;
+    }
+
+    .promptRow {
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+    }
+    .promptBox {
+      flex:1;
+      min-width:260px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid #223056;
+      background:#0b1222;
+      color:#b8c6ee;
+      font-size:13px;
+      line-height:1.35;
+    }
+    .promptBox strong { color:#e8eefc; }
+
+    .grid {
+      display:grid;
+      grid-template-columns: repeat(4, minmax(70px, 1fr));
+      gap:10px;
+    }
+    .tile {
+      height:72px;
+      border-radius:14px;
+      border:1px solid #223056;
+      background:#0b1222;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .06s ease, background .06s ease, border-color .06s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .tile:active { transform: scale(0.985); }
+    .tile .glyph {
+      font-size:30px;
+      font-weight:950;
+      letter-spacing:.6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .tile.correct { border-color: rgba(120, 240, 160, .45); background: rgba(120, 240, 160, .08); }
+    .tile.wrong   { border-color: rgba(255, 120, 120, .45); background: rgba(255, 120, 120, .08); }
+
+    .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:stretch; }
+    .stat { background:#0e1526; border:1px solid #223056; border-radius:12px; padding:10px 12px; min-width:180px; flex:1; }
+    .stat .label { font-size:12px; color:#b8c6ee; }
+    .stat .value { font-size:18px; font-weight:950; margin-top:2px; }
+    .mini { font-size:12px; color:#b8c6ee; margin-top:6px; }
+
+    .controls { display:flex; gap:10px; margin-left:auto; align-items:center; flex-wrap:wrap; }
+    button { cursor:pointer; border:0; border-radius:12px; padding:10px 12px; background:#2c6cff; color:#fff; font-weight:950; letter-spacing:.2px; }
+    button.secondary { background:#233252; color:#e8eefc; }
+    button.ghost { background:transparent; border:1px solid #2a3a64; color:#e8eefc; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+
+    .lock { margin-top:12px; padding:12px; border-radius:14px; border:1px solid #2a3a64; background:rgba(44,108,255,.10); display:none; }
+    .hint { font-size:12px; color:#b8c6ee; margin-top:10px; }
+
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: repeat(6, minmax(70px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <div>
+        <h1>Odd One Out — 5 Sets (Penalty) — Practice + Official</h1>
+        <p>
+          <span class="badge official" id="modeBadge">OFFICIAL — COUNTS</span>
+          Clear <strong>5</strong> grids. Wrong clicks add a <strong>+1500ms</strong> penalty.
+        </p>
+      </div>
+      <div class="pill" id="dayKeyPill">Day: —</div>
+    </div>
+
+    <div class="arena">
+      <div class="promptRow">
+        <div class="promptBox" id="promptBox">
+          Press <strong>START</strong>. Find the odd tile in each grid. Wrong clicks add time.
+        </div>
+        <div class="promptBox" style="max-width:320px;">
+          <strong>Final time</strong> = total time + penalties.<br/>
+          Faster final time = higher score.
+        </div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="row">
+      <div class="stat">
+        <div class="label">Mode</div>
+        <div class="value" id="modeText">OFFICIAL</div>
+        <div class="mini" id="modeMini">This run counts for today’s official score.</div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Progress</div>
+        <div class="value" id="progress">—</div>
+        <div class="mini" id="status">Idle</div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Penalties</div>
+        <div class="value" id="penalties">—</div>
+        <div class="mini" id="penMini">0 ms</div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Final time</div>
+        <div class="value" id="finalTime">—</div>
+        <div class="mini">Total + penalties</div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Final score</div>
+        <div class="value" id="score">—</div>
+      </div>
+
+      <div class="controls">
+        <button class="ghost" id="practiceBtn">Practice Mode</button>
+        <button class="ghost" id="officialBtn">Official Mode</button>
+        <button id="startBtn">START</button>
+        <button class="secondary" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div class="lock" id="lockBox">
+      <strong>Official attempt used for today.</strong><br/>
+      You can still play unlimited practice attempts. Official resets in: <span id="countdown">—</span>
+    </div>
+
+    <div class="hint">
+      Want it tighter? We can also cap wrong clicks per round (e.g., max 3) to prevent spam.
+    </div>
+  </div>
+
+<script>
+(() => {
+  const SCORE_ENDPOINT = "https://script.google.com/macros/s/AKfycbwVo0fgT9DuUtRSnEiyhljYp9baLCl0LL5id7hr5JU3XFnlT4Xr4Z20RQjVSYyyZi_Sbg/exec";
+  const GAME_NAME = "Odd One Out (5 Sets Penalty)";
+
+  function getUsername() {
+    let u = localStorage.getItem("odg_username");
+    if (!u) {
+      u = prompt("Enter a username (for the leaderboard):") || "";
+      u = u.trim().slice(0, 18);
+      if (u) localStorage.setItem("odg_username", u);
+    }
+    return u || "anon";
+  }
+
+  async function postScore(payload) {
+    try {
+      await fetch(SCORE_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      console.log("Score submitted");
+    } catch (err) {
+      console.warn("Score submit failed:", err);
+    }
+  }
+
+  // ====== Daily lock (12:00 AM ET) for OFFICIAL only ======
+  const TZ = "America/New_York";
+  const STORAGE_PREFIX = "oddOneOut5PenaltyOfficialAttempt:";
+
+  function formatPartsInTZ(date) {
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: TZ,
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false
+    });
+    const parts = fmt.formatToParts(date);
+    const obj = {};
+    for (const p of parts) obj[p.type] = p.value;
+    return obj;
+  }
+  function dayKeyET(date = new Date()) {
+    const p = formatPartsInTZ(date);
+    return `${p.year}-${p.month}-${p.day}`;
+  }
+  function msUntilNextMidnightET(now = new Date()) {
+    const p = formatPartsInTZ(now);
+    const todayKey = `${p.year}-${p.month}-${p.day}`;
+
+    const start = new Date(now.getTime());
+    start.setMinutes(0, 0, 0);
+    start.setHours(start.getHours() + 1);
+
+    let lo = start.getTime();
+    let hi = lo + 36 * 60 * 60 * 1000;
+
+    while (hi - lo > 1000) {
+      const mid = Math.floor((lo + hi) / 2);
+      const dk = dayKeyET(new Date(mid));
+      if (dk === todayKey) lo = mid + 1;
+      else hi = mid;
+    }
+    return Math.max(0, hi - now.getTime());
+  }
+  function humanCountdown(ms) {
+    const total = Math.ceil(ms / 1000);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+  function storageKeyForToday() { return STORAGE_PREFIX + dayKeyET(); }
+  function getTodayOfficial() {
+    const raw = localStorage.getItem(storageKeyForToday());
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+  function setTodayOfficial(payload) {
+    localStorage.setItem(storageKeyForToday(), JSON.stringify(payload));
+  }
+
+  // ====== DOM ======
+  const dayKeyPill = document.getElementById('dayKeyPill');
+  const modeBadge = document.getElementById('modeBadge');
+  const modeText = document.getElementById('modeText');
+  const modeMini = document.getElementById('modeMini');
+
+  const progressEl = document.getElementById('progress');
+  const statusEl = document.getElementById('status');
+
+  const penaltiesEl = document.getElementById('penalties');
+  const penMini = document.getElementById('penMini');
+  const finalTimeEl = document.getElementById('finalTime');
+  const scoreEl = document.getElementById('score');
+
+  const practiceBtn = document.getElementById('practiceBtn');
+  const officialBtn = document.getElementById('officialBtn');
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const lockBox = document.getElementById('lockBox');
+  const countdownEl = document.getElementById('countdown');
+
+  const promptBox = document.getElementById('promptBox');
+  const grid = document.getElementById('grid');
+
+  // ====== Game config ======
+  const ROUNDS = 5;
+  const GRID_SIZE = 24;
+  const PENALTY_MS = 1500;
+
+  // Score mapping: faster final time => higher score
+  const TIME_CAP_MS = 16000; // adjust: finalTime >= cap => score 0
+  const SCORE_MAX = 10000;
+
+  const PAIRS = [
+    ["E", "F"],  ["3", "8"],  ["5", "6"],  ["2", "Z"],
+    ["A", "Λ"],  ["C", "G"],  ["P", "R"],  ["O", "0"],
+    ["S", "5"],  ["B", "8"],  ["U", "V"],  ["n", "h"],
+  ];
+
+  // ====== State ======
+  let mode = "official";
+  let state = "idle"; // idle | live | done
+  let roundIndex = 0;
+  let oddIndex = -1;
+  let common = "";
+  let odd = "";
+  let runStartPerf = 0;
+  let finished = false;
+
+  let wrongClicks = 0;
+  let penaltyTotal = 0;
+
+  function officialLocked() { return !!getTodayOfficial(); }
+
+  function updateModeUI() {
+    if (mode === "practice") {
+      modeText.textContent = "PRACTICE";
+      modeMini.textContent = "Unlimited attempts. Never affects prizes.";
+      modeBadge.textContent = "PRACTICE";
+      modeBadge.classList.remove("official");
+      modeBadge.classList.add("practice");
+      practiceBtn.disabled = true;
+      officialBtn.disabled = false;
+    } else {
+      modeText.textContent = "OFFICIAL";
+      modeMini.textContent = "This run counts for today’s official score.";
+      modeBadge.textContent = "OFFICIAL — COUNTS";
+      modeBadge.classList.remove("practice");
+      modeBadge.classList.add("official");
+      practiceBtn.disabled = false;
+      officialBtn.disabled = true;
+    }
+  }
+
+  function applyOfficialLockUI() {
+    const existing = getTodayOfficial();
+    if (existing) {
+      lockBox.style.display = "block";
+      if (mode === "official") {
+        progressEl.textContent = `${existing.rounds}/${ROUNDS}`;
+        statusEl.textContent = "Locked";
+        penaltiesEl.textContent = `${existing.wrongClicks}`;
+        penMini.textContent = `${existing.penaltyMs} ms`;
+        finalTimeEl.textContent = `${existing.finalMs} ms`;
+        scoreEl.textContent = `${existing.score}`;
+        promptBox.innerHTML = `Official locked. Switch to <strong>Practice Mode</strong> to keep playing.`;
+        startBtn.disabled = true;
+      }
+    } else {
+      lockBox.style.display = "none";
+      if (mode === "official") startBtn.disabled = false;
+    }
+  }
+
+  function clearGrid() { grid.innerHTML = ""; }
+
+  function setState(s) {
+    state = s;
+    if (s === "idle") {
+      progressEl.textContent = "—";
+      statusEl.textContent = "Idle";
+      penaltiesEl.textContent = "—";
+      penMini.textContent = "0 ms";
+      finalTimeEl.textContent = "—";
+      scoreEl.textContent = "—";
+      promptBox.innerHTML = `Press <strong>START</strong>. Find the odd tile in each grid. Wrong clicks add time.`;
+      startBtn.textContent = "START";
+      startBtn.disabled = (mode === "official" && officialLocked());
+      finished = false;
+      clearGrid();
+    }
+    if (s === "live") {
+      statusEl.textContent = "Go";
+      startBtn.disabled = true;
+      finished = false;
+    }
+    if (s === "done") {
+      statusEl.textContent = "Done";
+      startBtn.textContent = "START";
+      startBtn.disabled = (mode === "official" && officialLocked());
+      finished = true;
+    }
+  }
+
+  function buildRound() {
+    clearGrid();
+
+    const pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
+    if (Math.random() < 0.5) { common = pair[0]; odd = pair[1]; }
+    else { common = pair[1]; odd = pair[0]; }
+
+    oddIndex = Math.floor(Math.random() * GRID_SIZE);
+
+    for (let i = 0; i < GRID_SIZE; i++) {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.dataset.index = String(i);
+
+      const glyph = document.createElement("div");
+      glyph.className = "glyph";
+      glyph.textContent = (i === oddIndex) ? odd : common;
+
+      tile.appendChild(glyph);
+      tile.addEventListener("click", () => onPick(i, tile));
+      grid.appendChild(tile);
+    }
+
+    progressEl.textContent = `${roundIndex + 1}/${ROUNDS}`;
+    promptBox.innerHTML = `Round <strong>${roundIndex + 1}</strong> of <strong>${ROUNDS}</strong>: tap the odd one out.`;
+  }
+
+  function computeFinalScore(finalMs) {
+    const raw = Math.round(SCORE_MAX * (1 - Math.min(finalMs, TIME_CAP_MS) / TIME_CAP_MS));
+    return Math.max(0, Math.min(SCORE_MAX, raw));
+  }
+
+  function finishRun() {
+    const totalMs = Math.round(performance.now() - runStartPerf);
+    const finalMs = totalMs + penaltyTotal;
+    const score = computeFinalScore(finalMs);
+
+    finalTimeEl.textContent = `${finalMs} ms`;
+    scoreEl.textContent = `${score}`;
+    promptBox.innerHTML = `Finished! Final time: <strong>${finalMs}ms</strong> (includes penalties).`;
+
+    setState("done");
+
+    if (mode === "official") {
+      setTodayOfficial({
+        dayKey: dayKeyET(),
+        rounds: ROUNDS,
+        wrongClicks,
+        penaltyMs: penaltyTotal,
+        totalMs,
+        finalMs,
+        score,
+        completedAt: Date.now()
+      });
+      const username = getUsername();
+      postScore({
+        game: GAME_NAME,
+        mode: "official",
+        username,
+        score,
+        finalMs,
+        wrongClicks,
+        penaltyMs: penaltyTotal
+      });
+      applyOfficialLockUI();
+      startBtn.disabled = true;
+    }
+  }
+
+  function markReveal(pickedTile, correct) {
+    const tiles = [...document.querySelectorAll(".tile")];
+    const oddTile = tiles[oddIndex];
+    if (oddTile) oddTile.classList.add("correct");
+    if (!correct && pickedTile) pickedTile.classList.add("wrong");
+  }
+
+  function onPick(i, tileEl) {
+    if (state !== "live" || finished) return;
+
+    const correct = (i === oddIndex);
+    if (!correct) {
+      wrongClicks++;
+      penaltyTotal += PENALTY_MS;
+      penaltiesEl.textContent = `${wrongClicks}`;
+      penMini.textContent = `${penaltyTotal} ms`;
+      statusEl.textContent = `+${PENALTY_MS}ms`;
+      tileEl.classList.add("wrong");
+      // Keep going (do not reveal the answer)
+      setTimeout(() => { if (!finished) statusEl.textContent = "Go"; }, 200);
+      return;
+    }
+
+    // Correct: reveal and advance
+    markReveal(tileEl, true);
+    statusEl.textContent = "Correct";
+
+    roundIndex++;
+    if (roundIndex >= ROUNDS) {
+      setTimeout(() => finishRun(), 220);
+      return;
+    }
+
+    setTimeout(() => {
+      statusEl.textContent = "Go";
+      buildRound();
+    }, 180);
+  }
+
+  function startRun() {
+    if (mode === "official" && officialLocked()) {
+      applyOfficialLockUI();
+      return;
+    }
+    finished = false;
+    roundIndex = 0;
+    wrongClicks = 0;
+    penaltyTotal = 0;
+
+    penaltiesEl.textContent = "0";
+    penMini.textContent = "0 ms";
+    finalTimeEl.textContent = "—";
+    scoreEl.textContent = "—";
+
+    setState("live");
+    runStartPerf = performance.now();
+    buildRound();
+  }
+
+  function resetAll() {
+    setState("idle");
+    applyOfficialLockUI();
+  }
+
+  function setMode(newMode) {
+    mode = newMode;
+    updateModeUI();
+    resetAll();
+    applyOfficialLockUI();
+    if (mode === "practice") startBtn.disabled = false;
+    if (mode === "official") startBtn.disabled = officialLocked();
+  }
+
+  // ====== Events ======
+  startBtn.addEventListener("click", startRun);
+  resetBtn.addEventListener("click", resetAll);
+  practiceBtn.addEventListener("click", () => setMode("practice"));
+  officialBtn.addEventListener("click", () => setMode("official"));
+
+  // ====== Countdown updater ======
+  function updateCountdown() {
+    const ms = msUntilNextMidnightET(new Date());
+    countdownEl.textContent = humanCountdown(ms);
+    dayKeyPill.textContent = `Day: ${dayKeyET()}`;
+    applyOfficialLockUI();
+    if (mode === "official") startBtn.disabled = officialLocked();
+  }
+
+  // ====== Init ======
+  dayKeyPill.textContent = `Day: ${dayKeyET()}`;
+  updateModeUI();
+
+  // If official used already, start in practice
+  if (getTodayOfficial()) {
+    mode = "practice";
+    updateModeUI();
+  }
+
+  setState("idle");
+  applyOfficialLockUI();
+  updateCountdown();
+  setInterval(updateCountdown, 250);
+})();
+</script>
+</body>
+</html>
