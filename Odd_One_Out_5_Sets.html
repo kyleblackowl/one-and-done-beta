@@ -413,43 +413,45 @@
     return Math.max(0, Math.min(SCORE_MAX, raw));
   }
 
-  function finishRun() {
-    const totalMs = Math.round(performance.now() - runStartPerf);
-    const finalMs = totalMs + penaltyTotal;
-    const score = computeFinalScore(finalMs);
+function finishRun() {
+  const totalMs = Math.round(performance.now() - runStartPerf);
+  const finalMs = totalMs + penaltyTotal;
+  const score = computeFinalScore(finalMs);
 
-    finalTimeEl.textContent = `${finalMs} ms`;
-    scoreEl.textContent = `${score}`;
-    promptBox.innerHTML = `Finished! Final time: <strong>${finalMs}ms</strong> (includes penalties).`;
+  finalTimeEl.textContent = `${finalMs} ms`;
+  scoreEl.textContent = `${score}`;
+  promptBox.innerHTML = `Finished! Final time: <strong>${finalMs}ms</strong> (includes penalties).`;
 
-    setState("done");
+  setState("done");
 
-if (mode === "official") {
-  setTodayOfficial({
-    dayKey: dayKeyET(),
-    rounds: ROUNDS,
-    wrongClicks,
-    penaltyMs: penaltyTotal,
-    totalMs,
-    finalMs,
-    score,
-    completedAt: Date.now()
-  });
+  if (mode === "official") {
+    setTodayOfficial({
+      dayKey: dayKeyET(),
+      rounds: ROUNDS,
+      wrongClicks,
+      penaltyMs: penaltyTotal,
+      totalMs,
+      finalMs,
+      score,
+      completedAt: Date.now()
+    });
 
-  const username = getUsername();
-  postScore({
-    game: GAME_NAME,
-    mode: "official",
-    username,
-    score,
-    finalMs,
-    wrongClicks,
-    penaltyMs: penaltyTotal
-  });
+    const username = getUsername();
+    postScore({
+      game: GAME_NAME,
+      mode: "official",
+      username,
+      score,
+      finalMs,
+      wrongClicks,
+      penaltyMs: penaltyTotal
+    });
 
-  applyOfficialLockUI();
-  startBtn.disabled = true;
+    applyOfficialLockUI();
+    startBtn.disabled = true;
+  }
 }
+
 
 
   function markReveal(pickedTile, correct) {
