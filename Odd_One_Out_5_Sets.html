@@ -173,34 +173,6 @@
 <script>
 (() => {
 
-const SCORE_ENDPOINT = "YOUR_WEB_APP_URL_HERE";
-const GAME_NAME = "Odd One Out (5 Sets)";
-
-function getUsername() {
-  let u = localStorage.getItem("odg_username");
-  if (!u) {
-    u = prompt("Enter a username (for beta testing):") || "";
-    u = u.trim().slice(0,18);
-    if (u) localStorage.setItem("odg_username", u);
-  }
-  return u || "anon";
-}
-
-async function postScore(payload) {
-  try {
-    await fetch(SCORE_ENDPOINT,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json"},
-      body:JSON.stringify(payload)
-    });
-    console.log("Score submitted");
-  } catch(e){
-    console.log("Submit failed", e);
-  }
-}
-
-  // EXISTING game code continues here...
-
   const SCORE_ENDPOINT = "https://script.google.com/macros/s/AKfycbwVo0fgT9DuUtRSnEiyhljYp9baLCl0LL5id7hr5JU3XFnlT4Xr4Z20RQjVSYyyZi_Sbg/exec";
   const GAME_NAME = "Odd One Out (5 Sets Penalty)";
 
